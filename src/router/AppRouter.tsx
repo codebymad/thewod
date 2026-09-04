@@ -11,6 +11,7 @@ function AppRouter() {
       <Route path="/programs" element={<ProgramsPage />} />
       <Route path="/notes" element={<NotesPage />} />
       <Route path="/error" element={<NotFoundPage />} />
+      <Route path="/" element={<Navigate to="/home" replace />} />
       <Route path="*" element={<Navigate to="/error" replace />} />
     </Routes>
   );
