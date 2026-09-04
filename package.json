@@ -2,7 +2,13 @@
   "name": "thewod",
   "description": "Namma WOD fitness app built with React + Vite + MUI",
   "author": "Manjunath <manjunath189@gmail.com>",
-  "keywords": ["react", "vite", "mui", "fitness", "wod"],
+  "keywords": [
+    "react",
+    "vite",
+    "mui",
+    "fitness",
+    "wod"
+  ],
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,8 +16,11 @@
     "type": "git",
     "url": "https://github.com/codebymad/thewod.git"
   },
+  "homepage": "https://codebymad.github.io/thewod/",
   "scripts": {
     "dev": "vite",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
@@ -36,6 +45,7 @@
     "eslint": "^10.9.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.4",
+    "gh-pages": "^6.3.0",
     "globals": "^17.11.0",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.67.0",
