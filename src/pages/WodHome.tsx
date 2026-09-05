@@ -2,9 +2,6 @@ import React, { useEffect } from "react";
 import WorkoutSectionCards from "./WorkoutSectionCard";
 import { Box, Button, ButtonGroup, Chip, IconButton, Stack } from "@mui/material";
 import ShuffleIcon from '@mui/icons-material/Shuffle';
-import RestartAltIcon from '@mui/icons-material/RestartAlt';
-import FilterIcon from '@mui/icons-material/FilterAlt';
-import FilterListIcon from '@mui/icons-material/FilterList';
 import getWorkout from './WorkoutGetter'
 
 
@@ -88,32 +85,6 @@ export default function WodHome() {
             setWorkoutData([formatted]);
         }
     }
-
-
-    function applyFilter() {
-        console.log("filter")
-        setShowFilter(prev => !prev);
-    }
-
-    function revertToTodays() {
-        console.log("Revert")
-    }
-
-
-    const mockWorkout = [
-        {
-            workoutheader: "Warmup",
-            workoutdetails: "3 rounds: 10 air squats, 10 push-ups, 10 sit-ups"
-        },
-        {
-            workoutheader: "Metcon",
-            workoutdetails: "AMRAP 20: 10 burpees, 20 sit-ups, 200m run"
-        },
-        {
-            workoutheader: "Accessory",
-            workoutdetails: "3x12 dumbbell rows"
-        }
-    ];
 
     return (
         <>
