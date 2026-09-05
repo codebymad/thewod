@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Box, type PaletteMode } from "@mui/material";
 import AppRouter from "./router/AppRouter";
 import TopBar from "./layouts/Topbar";
-import { BrowserRouter } from "react-router-dom";
+import { HashRouter } from "react-router-dom";
 
 function App() {
   const [mode, setMode] = useState<PaletteMode>("light");
@@ -23,18 +23,12 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
 
-      <BrowserRouter basename={import.meta.env.BASE_URL}>
+      <HashRouter>
         <TopBar />
-
-        <Box
-          className="maincontent"
-          sx={{
-            px: { xs: 1, md: 0 }
-          }}
-        >
+        <Box className="maincontent" sx={{ px: { xs: 1, md: 0 } }}>
           <AppRouter />
         </Box>
-      </BrowserRouter>
+      </HashRouter>
     </ThemeProvider>
   );
 }

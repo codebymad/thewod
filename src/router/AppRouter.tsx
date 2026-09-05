@@ -13,7 +13,6 @@ function AppRouter() {
       <Route path="/error" element={<NotFoundPage />} />
       <Route path="/" element={<Navigate to="/home" replace />} />
       <Route path="*" element={<Navigate to="/error" replace />} />
-      <Route path="/index.html" element={<Navigate to="/home" replace />} />
     </Routes>
   );
 }

@@ -1,4 +1,5 @@
 import { Stack, Card, CardContent, Typography } from "@mui/material";
+import ReactMarkdown from "react-markdown";
 
 interface WorkoutSection {
   workoutheader: string;
@@ -23,7 +24,7 @@ export default function WorkoutSectionCards({ workoutdata }: WorkoutSectionCards
             </Typography>
 
             <Typography variant="body2">
-              {section.workoutdetails}
+             <ReactMarkdown>{section.workoutdetails}</ReactMarkdown>
             </Typography>
           </CardContent>
         </Card>
