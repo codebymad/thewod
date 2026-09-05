@@ -7,7 +7,7 @@ import getWorkout from './WorkoutGetter'
 
 export default function WodHome() {
 
-    const [showFilter, setShowFilter] = React.useState(false);
+    const [showFilter] = React.useState(false);
     const [filters, setFilters] = React.useState<{ key: string; label: string }[]>([]);
     const [workoutData, setWorkoutData] = React.useState<any[]>([]);
 
