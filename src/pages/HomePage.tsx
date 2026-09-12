@@ -1,48 +1,87 @@
-import { Box, Paper, Stack, Typography } from "@mui/material"
+import { Box, Button, Paper, Stack, Typography } from "@mui/material"
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import WorkoutSection from "../components/WorkoutSection"
+import LogScore from "../components/LogScore";
+import ScoreHistory from "../components/ScoreHistory";
+import QuoteOfTheDay from "../components/Quote";
 
 function HomePage() {
 
   return (
-    <Box sx={{ maxWidth: 1200, mx: 'auto', py: 2, px: { xs: 2, md: 0 } }}>
-      <Typography variant="h3" component="h1" sx={{ fontWeight: 700 }}> Today's Workout </Typography>
+    <>
+      <Box sx={{ display: 'flex', justifyContent: { xs: 'center', md: 'flex-start' }, mb: { xs: 1, md: 3 } }}>
+        <Typography variant="h3" component="h1"
+          sx={{
+            fontWeight: 700,
+            fontSize: { xs: '1.5rem', md: '3rem' },
+            textAlign: 'center'
+          }}
+        >
+          Today's Workout
+        </Typography>
+      </Box>
 
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '6fr 4fr' }, gap: 3 }}>
 
 
-        <Paper sx={{ p: 2, backgroundColor: 'background.paper' }}>
-         <WorkoutSection />
-        </Paper>
+        <Box>
+          <Box sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            mb: 2
+          }}>
+            <Button
+              variant="outlined"
+              startIcon={<ArrowBackIcon />}
+              sx={{
+                minWidth: { xs: 'auto' },
+                '& .MuiButton-startIcon': { mr: { xs: 0, sm: 1 } },
+                '& .MuiButton-label': { display: { xs: 'none', sm: 'inline' } },
+                '& .MuiButton-text': { display: { xs: 'none', sm: 'inline' } }
+              }}
+            >
+              <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>Prev</Box>
+            </Button>
+            <Typography variant="h6">Sep 11, 2026</Typography>
+            <Button
+              variant="outlined"
+              endIcon={<ArrowForwardIcon />}
+              sx={{
+                minWidth: { xs: 'auto' },
+                '& .MuiButton-endIcon': { ml: { xs: 0, sm: 1 } },
+                '& .MuiButton-label': { display: { xs: 'none', sm: 'inline' } },
+                '& .MuiButton-text': { display: { xs: 'none', sm: 'inline' } }
+              }}
+            >
+              <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>Next</Box>
+            </Button>
+          </Box>
+
+          <Paper sx={{ p: 2, backgroundColor: 'background.paper' }}>
+
+            <WorkoutSection />
+
+          </Paper>
+
+        </Box>
+
 
 
         <Stack spacing={2}>
-          <Paper sx={{ p: 2, backgroundColor: 'background.paper' }}>
-            <Typography variant="h2" color="secondary"> Quick Links </Typography>
-            <Box sx={{ mt: 2 }}>
-              <Typography variant="body1">
-                - <a href="/programs">Programs</a>
-              </Typography>
-              <Typography variant="body1">
-                - <a href="/history">History</a>
-              </Typography>
-              <Typography variant="body1">
-                - <a href="/results">Results</a>
-              </Typography>
-            </Box>
-          </Paper>
 
-          <Paper sx={{ p: 2, backgroundColor: 'background.paper' }}>
-            <Typography variant="h2" color="secondary"> About </Typography>
-            <Typography variant="body1" sx={{ mt: 2 }}>
-              The WOD App is built using React and Material-UI, providing a responsive and user-friendly interface. It leverages modern web technologies to ensure a seamless experience across devices.
-            </Typography>
-          </Paper>
+          <QuoteOfTheDay />
+
+          <LogScore />
+
+          <ScoreHistory />
+
         </Stack>
 
 
       </Box>
-
-    </Box>
+    </>
   )
 }
 

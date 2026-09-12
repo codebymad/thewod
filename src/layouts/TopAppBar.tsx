@@ -15,8 +15,8 @@ import { Collapse, List, ListItem, ListItemButton, ListItemText } from '@mui/mat
 const menuItems = [
     { label: 'Home', path: '/home' },
     { label: 'Programs', path: '/programs' },
-    { label: 'History', path: '/history' },
-    { label: 'Results', path: '/results' },
+    // { label: 'History', path: '/history' },
+    // { label: 'Results', path: '/results' },
 ]
 
 function TopAppBar({ mode, onToggleMode }: { mode: 'light' | 'dark', onToggleMode: () => void }) {

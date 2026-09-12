@@ -35,7 +35,9 @@ function App() {
           onToggleMode={() => setMode(prev => prev === 'dark' ? 'light' : 'dark')}
         />
 
-        <WodAppRouter />
+        <Box sx={{ maxWidth: 1200, mx: 'auto', py: 2, px: { xs: 2, md: 0 } }}>
+          <WodAppRouter />
+        </Box>
       </Box>
 
 
