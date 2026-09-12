@@ -22,7 +22,7 @@ export const buildAppTheme = (mode: themeMode) =>
                 main: '#f7b267',
             },
             background: {
-                default: mode === 'dark' ? '#0d1117' : '#f5f1eb',   
+                default: mode === 'dark' ? '#0d1117' : '#f5f1eb',//'#f5f1eb',  D7D7D9 
                 paper: mode === 'dark' ? '#141b23' : '#fffdf9',
             },
             text: {
