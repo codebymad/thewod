@@ -7,7 +7,7 @@ export const getInitialThemeMode = (): themeMode => {
     if (storedThemeMode === 'dark' || storedThemeMode === 'light') {
         return storedThemeMode as themeMode;
     }
-    
+
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 };
 
@@ -47,6 +47,14 @@ export const buildAppTheme = (mode: themeMode) =>
             h6: {
                 fontSize: '1rem',
                 fontWeight: 500,
+            },
+            subtitle2: {
+                fontWeight: 700,
+                fontSize: 13
+            },
+            body2: {
+                fontWeight: 500,
+                fontSize: 17
             },
             button: {
                 textTransform: 'none',

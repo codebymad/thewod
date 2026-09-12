@@ -1,11 +1,15 @@
-import { Accordion, AccordionDetails, AccordionSummary, Box, Divider, Stack, Typography } from "@mui/material"
+import { Accordion, AccordionDetails, AccordionSummary, Box, Checkbox, Divider, Stack, Typography } from "@mui/material"
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-
+import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
+import TaskAltIcon from '@mui/icons-material/TaskAlt';
 
 function WorkoutSection() {
     return (
         <Box sx={{ p: 0 }}>
-            <Typography variant="h4" color="secondary" gutterBottom sx={{ fontWeight: 'bold', mb: 2, pl: 1 }}>
+            <Typography variant="h4" color="secondary" gutterBottom sx={{
+                fontWeight: 'bold', mb: 2, pl: 1,
+                fontSize: { xs: '1.1rem', md: '2rem' }
+            }}>
                 Four Ton Mayhem
             </Typography>
 
@@ -28,23 +32,34 @@ function WorkoutSection() {
                     id={`accordion1-header`}
                     sx={{ px: 2 }}
                 >
+                   
                     <Typography variant="h6" component="div" sx={{ color: 'text.primary', fontSize: 17, fontWeight: 700 }}>
-                        Warm Up
+                        <Checkbox icon={<RadioButtonUncheckedIcon />} checkedIcon={<TaskAltIcon />} /> Warm Up
                     </Typography>
                 </AccordionSummary>
                 <AccordionDetails sx={{ p: 2 }}>
                     <Stack spacing={2}>
                         <Box>
-                            <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'primary.main', mb: 0.5, fontSize: 13, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                            <Typography variant="subtitle2" sx={{ color: 'primary.main', mb: 0.5, textTransform: 'uppercase', letterSpacing: 0.5 }}>
                                 General Warm Up:
                             </Typography>
-                            <Typography variant="body2" sx={{ color: 'text.primary', lineHeight: 1.6, fontWeight: 500 }}>
-                                5 Minute Easy Row or Jog<br />
+                            <Typography variant="body2" sx={{ color: 'text.primary', lineHeight: 1.6 }}>
+                                5 Minute Easy Row or Jog<br /> <br />
                                 2 Rounds of:<br />
                                 - 10 Scapular Pull-ups<br />
-                                - 10 Air Squats<br />
+                                - 10 Air Squats - Slow and Tempo<br />
                                 - 10 Push-ups<br />
-                                - 20 Seconds Plank
+                                - 20 Seconds Plank <br />
+                                - 10 Plate Thrusters
+                            </Typography>
+                        </Box>
+
+                        <Box sx={{ display: 'flex', gap: 3, pb: 1 }}>
+                            <Typography variant="caption" sx={{ color: 'text.primary', fontWeight: 600, bgcolor: 'action.hover', px: 1, py: 0.2, borderRadius: 1 }}>
+                                Take your time
+                            </Typography>
+                            <Typography variant="caption" sx={{ color: 'text.primary', fontWeight: 600, bgcolor: 'action.hover', px: 1, py: 0.2, borderRadius: 1 }}>
+                                Prepare of Metcon
                             </Typography>
                         </Box>
 
@@ -116,7 +131,7 @@ function WorkoutSection() {
                     sx={{ px: 2 }}
                 >
                     <Typography variant="h6" component="div" sx={{ color: 'text.primary', fontSize: 17, fontWeight: 700 }}>
-                        Metcon
+                        <Checkbox icon={<RadioButtonUncheckedIcon />} checkedIcon={<TaskAltIcon />} /> Metcon
                     </Typography>
                 </AccordionSummary>
                 <AccordionDetails sx={{ p: 2 }}>
@@ -210,7 +225,7 @@ function WorkoutSection() {
                     sx={{ px: 2 }}
                 >
                     <Typography variant="h6" component="div" sx={{ color: 'text.primary', fontSize: 17, fontWeight: 700 }}>
-                        Accessory / Cooldown
+                       <Checkbox icon={<RadioButtonUncheckedIcon />} checkedIcon={<TaskAltIcon />} /> Accessory / Cooldown
                     </Typography>
                 </AccordionSummary>
                 <AccordionDetails sx={{ p: 2 }}>
