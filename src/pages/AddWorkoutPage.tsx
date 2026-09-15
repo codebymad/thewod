@@ -113,7 +113,7 @@ function AddWorkoutPage() {
 
                 <Divider />
 
-                {sections.map((section, index) => (
+                {sections.map((section, _) => (
                     <Accordion
                         key={section.id}
                         sx={{
