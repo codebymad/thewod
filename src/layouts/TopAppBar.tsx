@@ -15,6 +15,7 @@ import { Collapse, List, ListItem, ListItemButton, ListItemText } from '@mui/mat
 const menuItems = [
     { label: 'Home', path: '/home' },
     { label: 'Programs', path: '/programs' },
+    { label: 'Add Workout', path: '/addworkout' },
     // { label: 'History', path: '/history' },
     // { label: 'Results', path: '/results' },
 ]
@@ -25,11 +26,11 @@ function TopAppBar({ mode, onToggleMode }: { mode: 'light' | 'dark', onToggleMod
     const isSelected = (path: string) => {
         return location.pathname === path;
     }
-    
+
     const handleToggleMenu = () => {
         setMenuOpen(!menuOpen);
     };
-    
+
     return (
         <Box sx={{ flexGrow: 1 }}>
             <AppBar position="static" sx={{
@@ -38,10 +39,10 @@ function TopAppBar({ mode, onToggleMode }: { mode: 'light' | 'dark', onToggleMod
                 color: mode === 'dark' ? '#fff' : '#111',
             }}>
                 <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <IconButton 
-                        color="inherit" 
-                        edge="start" 
-                        onClick={handleToggleMenu} 
+                    <IconButton
+                        color="inherit"
+                        edge="start"
+                        onClick={handleToggleMenu}
                         sx={{ display: { xs: 'block', sm: 'none' } }}
                     >
                         {menuOpen ? <CloseIcon /> : <MenuIcon />}
@@ -51,12 +52,12 @@ function TopAppBar({ mode, onToggleMode }: { mode: 'light' | 'dark', onToggleMod
                         <b><i>the </i>WOD</b>
                     </Typography>
 
-                    <Box sx={{ 
-                        display: { xs: 'none', sm: 'flex' }, 
-                        alignItems: 'center', 
-                        gap: 1, 
-                        flexGrow: 1, 
-                        justifyContent: 'flex-end' 
+                    <Box sx={{
+                        display: { xs: 'none', sm: 'flex' },
+                        alignItems: 'center',
+                        gap: 1,
+                        flexGrow: 1,
+                        justifyContent: 'flex-end'
                     }}>
                         {menuItems.map((item) => (
                             <Button component={Link}
@@ -79,8 +80,8 @@ function TopAppBar({ mode, onToggleMode }: { mode: 'light' | 'dark', onToggleMod
             </AppBar>
 
             <Collapse in={menuOpen} sx={{ display: { sm: 'none' } }}>
-                <Box sx={{ 
-                    backgroundColor: 'background.paper', 
+                <Box sx={{
+                    backgroundColor: 'background.paper',
                     color: mode === 'dark' ? '#fff' : '#111',
                     borderBottom: '1px solid',
                     borderColor: 'divider'
@@ -88,9 +89,9 @@ function TopAppBar({ mode, onToggleMode }: { mode: 'light' | 'dark', onToggleMod
                     <List>
                         {menuItems.map((item) => (
                             <ListItem key={item.path} disablePadding>
-                                <ListItemButton 
-                                    component={Link} 
-                                    to={item.path} 
+                                <ListItemButton
+                                    component={Link}
+                                    to={item.path}
                                     onClick={() => setMenuOpen(false)}
                                     selected={isSelected(item.path)}
                                 >
@@ -105,6 +106,9 @@ function TopAppBar({ mode, onToggleMode }: { mode: 'light' | 'dark', onToggleMod
             <Box sx={{ display: 'none' }}>
                 {/* Removed redundant desktop menu box as it's now inside the AppBar for desktop */}
             </Box>
+
+
+            
         </Box>
     )
 }

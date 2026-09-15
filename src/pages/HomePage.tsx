@@ -59,7 +59,7 @@ function HomePage() {
             </Button>
           </Box>
 
-          <Paper sx={{ p: 2, backgroundColor: 'background.paper' }}>
+          <Paper sx={{ p: 2, backgroundColor: 'background.paper', boxShadow: '0 10px 30px rgbx(0,0,0,0.08)' }}>
 
             <WorkoutSection />
 
