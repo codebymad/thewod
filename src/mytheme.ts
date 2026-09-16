@@ -65,6 +65,29 @@ export const buildAppTheme = (mode: themeMode) =>
             borderRadius: 4,
         },
         components: {
+            MuiCssBaseline: {
+                styleOverrides: {
+                    html: {
+                        scrollbarColor: mode === 'dark' ? '#4a5565 #0d1117' : '#b9b3aa #f5f1eb',
+                        scrollbarWidth: 'thin',
+                    },
+                    '*::-webkit-scrollbar': {
+                        width: 10,
+                        height: 10,
+                    },
+                    '*::-webkit-scrollbar-track': {
+                        backgroundColor: mode === 'dark' ? '#0d1117' : '#f5f1eb',
+                    },
+                    '*::-webkit-scrollbar-thumb': {
+                        backgroundColor: mode === 'dark' ? '#4a5565' : '#b9b3aa',
+                        borderRadius: 8,
+                        border: `2px solid ${mode === 'dark' ? '#0d1117' : '#f5f1eb'}`,
+                    },
+                    '*::-webkit-scrollbar-thumb:hover': {
+                        backgroundColor: mode === 'dark' ? '#667386' : '#938d84',
+                    },
+                },
+            },
             MuiButton: {
                 styleOverrides: {
                     root: {

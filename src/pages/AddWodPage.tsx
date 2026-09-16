@@ -2,7 +2,6 @@ import { Box, Button, Card, CardActions, CardContent, Dialog, DialogActions, Dia
 import AddIcon from '@mui/icons-material/Add';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 import { useEffect, useState } from "react";
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -10,6 +9,7 @@ import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
 import dayjs, { Dayjs } from "dayjs";
 import 'dayjs/locale/en';
 import 'dayjs/locale/en-gb';
+import WorkoutSection from "../components/WorkoutSection";
 dayjs.locale('en-gb');
 
 
@@ -18,6 +18,7 @@ const CALENDAR_LOCALE = WEEK_START_DAY === 'mon' ? 'en-gb' : 'en';
 
 function AddWodPage() {
     const [addNewProgramDialogOpen, setAddNewProgramDialogOpen] = useState(false);
+    const [editDayWorkoutDialogOpen, setEditDayWorkoutDialogOpen] = useState(false);
     const [isCalendarExpanded, setIsCalendarExpanded] = useState(false);
     const [currentDayOfWeek, setCurrentDayOfWeek] = useState(3);
     const [selectedDate, setSelectedDate] = useState<Dayjs | null>(dayjs());
@@ -105,7 +106,7 @@ function AddWodPage() {
                             boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
                         }}
                     >
-                        <CardContent sx={{ p: { xs: 2.5, md: 4 } }}>
+                        <CardContent sx={{ p: { xs: 1, md: 2 } }} >
                             <Stack spacing={3}>
 
                                 {/* Calendar toggle row */}
@@ -123,7 +124,7 @@ function AddWodPage() {
                                         variant="outlined"
                                         endIcon={isCalendarExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                                         onClick={() => setIsCalendarExpanded((c) => !c)}
-                                        sx={{ borderRadius: 2, px: 2 }}
+                                        sx={{ borderRadius: 2, px: 1 }}
                                     >
                                         {isCalendarExpanded ? 'Hide Calendar' : 'Show Calendar'}
                                     </Button>
@@ -292,10 +293,25 @@ function AddWodPage() {
                                                         )}
                                                     </Box>
 
-                                                    <Divider sx={{ opacity: 0.5 }} />
+                                                    {/* Add exercise — only on selected */}
+                                                    {selected && (
+                                                        <Button
+                                                            size="small"
+                                                            variant="outlined"
+                                                            startIcon={<AddIcon />}
+                                                            disableElevation
+                                                            sx={{ borderRadius: 1.5, fontSize: '0.75rem', mt: 'auto' }}
+                                                            onClick={() => setEditDayWorkoutDialogOpen(true)}
+                                                        >
+                                                            Edit exercise
+                                                        </Button>
+                                                    )}
+
+
+                                                    {/* <Divider sx={{ opacity: 0.5 }} /> */}
 
                                                     {/* Empty state */}
-                                                    <Box sx={{
+                                                    {/* <Box sx={{
                                                         flex: 1,
                                                         display: 'flex',
                                                         flexDirection: 'column',
@@ -309,20 +325,12 @@ function AddWodPage() {
                                                         <Typography variant="caption" color="text.disabled" align="center" sx={{ fontSize: '0.7rem' }}>
                                                             No exercises
                                                         </Typography>
-                                                    </Box>
+                                                    </Box> */}
 
-                                                    {/* Add exercise — only on selected */}
-                                                    {selected && (
-                                                        <Button
-                                                            size="small"
-                                                            variant="outlined"
-                                                            startIcon={<AddIcon />}
-                                                            disableElevation
-                                                            sx={{ borderRadius: 1.5, fontSize: '0.75rem', mt: 'auto' }}
-                                                        >
-                                                            Add exercise
-                                                        </Button>
-                                                    )}
+                                                    <WorkoutSection />
+
+
+
                                                 </CardContent>
                                             </Card>
                                         );
@@ -339,12 +347,16 @@ function AddWodPage() {
                 {/* ── DIALOG (unchanged) ── */}
                 <Dialog
                     open={addNewProgramDialogOpen}
+                    onClose={() => setAddNewProgramDialogOpen(false)}
+                    maxWidth={false}
+                    fullWidth
+
                     aria-labelledby="alert-dialog-title"
                     aria-describedby="alert-dialog-description"
                     role="alertdialog"
                 >
                     <DialogTitle id="alert-dialog-title">
-                        {"Use Google's location service?"}
+                        {"Create Program"}
                     </DialogTitle>
                     <DialogContent>
                         <DialogContentText id="alert-dialog-description">
@@ -353,8 +365,35 @@ function AddWodPage() {
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>
-                        <Button autoFocus>Disagree</Button>
-                        <Button>Agree</Button>
+                        <Button onClick={() => setAddNewProgramDialogOpen(false)}>Cancel</Button>
+                        <Button autoFocus variant="contained">Save Program</Button>
+                    </DialogActions>
+                </Dialog>
+
+
+                <Dialog
+                    open={editDayWorkoutDialogOpen}
+                    onClose={() => setEditDayWorkoutDialogOpen(false)}
+                    maxWidth={false}
+                    fullWidth
+
+                    aria-labelledby="alert-dialog-title"
+                    aria-describedby="alert-dialog-description"
+                    role="alertdialog"
+                >
+                    <DialogTitle id="alert-dialog-title">
+                        {"Add & Edit Workout"}
+                    </DialogTitle>
+                    <DialogContent>
+                        {/* <DialogContentText id="alert-dialog-description">
+                            Let Google help apps determine location. This means sending anonymous
+                            location data to Google, even when no apps are running.
+                        </DialogContentText> */}
+                        <WorkoutSection />
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => setEditDayWorkoutDialogOpen(false)}>Cancel</Button>
+                        <Button autoFocus variant="contained">Save Workout</Button>
                     </DialogActions>
                 </Dialog>
 
