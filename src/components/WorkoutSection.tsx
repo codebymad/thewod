@@ -35,6 +35,17 @@ function WorkoutSection({ workout }: Props) {
                 {workout?.workout_name}
             </Typography>
 
+
+            <Box sx={{ display: 'flex', gap: 3, pb: 1 }}>
+                {workout?.metadata?.tags?.map((tag: string, _: number) => (
+                    <Typography variant="caption" sx={{ color: 'text.primary', fontWeight: 600, bgcolor: 'action.hover', px: 1, py: 0.2, borderRadius: 1 }}>
+                        {tag}
+                    </Typography>
+                ))}
+            </Box>
+
+
+
             {workout?.sections.map((section, _) => (
                 <Accordion
                     defaultExpanded

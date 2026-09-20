@@ -13,6 +13,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 function HomePage() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [wod, setWod] = useState(null);
+  const [apirespmetadata, setApirespmetadata] = useState(String);
   const [loading, setLoading] = useState(true);
 
   // Normalize date to midnight (fixes comparison issues)
@@ -71,8 +72,16 @@ function HomePage() {
     async function load() {
       setLoading(true);
       try {
-        const data = await getDailyWod(formatApiDate(currentDate));
-        setWod(data);
+        const result = await getDailyWod(formatApiDate(currentDate));
+
+        if (!result) {
+          setWod(null);
+          setApirespmetadata('');
+          return;
+        }
+
+        setWod(result.data);
+        setApirespmetadata(result.meta);
       } finally {
         setLoading(false);
       }
@@ -203,7 +212,25 @@ function HomePage() {
           >
             <WorkoutSection workout={wod} />
           </Paper>
+
+          <Typography
+            variant="caption"
+            sx={{
+              fontStyle: "italic",
+              fontSize: "0.75rem",
+              bgcolor: "action.hover",
+              px: 1,
+              py: 0.2,
+              borderRadius: 1,
+              display: "inline-block",
+            }}
+          >
+            {apirespmetadata}
+          </Typography>
+
+
         </Box>
+
 
         <Stack spacing={2} sx={{ pointerEvents: "none", opacity: 0.5 }}>
           <QuoteOfTheDay />

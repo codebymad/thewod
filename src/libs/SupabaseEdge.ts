@@ -28,5 +28,17 @@ export async function getDailyWod(input: string) {
 
     if (!res || !res.object) return null;
 
-    return res.object; // <-- ONLY return the workout object
+    const meta =
+        res.bucket.name +
+        "_" +
+        res.folder.name +
+        "_" +
+        res.file.name +
+        "_" +
+        res.objectIndex;
+
+    return {
+        data: res.object,
+        meta,
+    };
 }
