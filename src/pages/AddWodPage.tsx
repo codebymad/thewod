@@ -3,6 +3,7 @@ import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 import { useEffect, useState } from "react";
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -10,7 +11,6 @@ import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
 import dayjs, { Dayjs } from "dayjs";
 import 'dayjs/locale/en';
 import 'dayjs/locale/en-gb';
-import WorkoutSection from "../components/WorkoutSection";
 dayjs.locale('en-gb');
 
 
@@ -324,7 +324,7 @@ function AddWodPage() {
                                                     {/* <Divider sx={{ opacity: 0.5 }} /> */}
 
                                                     {/* Empty state */}
-                                                    {/* <Box sx={{
+                                                    <Box sx={{
                                                         flex: 1,
                                                         display: 'flex',
                                                         flexDirection: 'column',
@@ -336,11 +336,11 @@ function AddWodPage() {
                                                     }}>
                                                         <FitnessCenterIcon sx={{ fontSize: 22, color: 'text.disabled' }} />
                                                         <Typography variant="caption" color="text.disabled" align="center" sx={{ fontSize: '0.7rem' }}>
-                                                            No exercises
+                                                            {today} No exercises
                                                         </Typography>
-                                                    </Box> */}
+                                                    </Box>
 
-                                                    <WorkoutSection />
+                                                    {/* <WorkoutSection /> */}
 
 
 
@@ -398,11 +398,11 @@ function AddWodPage() {
                         {"Add & Edit Workout"}
                     </DialogTitle>
                     <DialogContent>
-                        {/* <DialogContentText id="alert-dialog-description">
+                        <DialogContentText id="alert-dialog-description">
                             Let Google help apps determine location. This means sending anonymous
                             location data to Google, even when no apps are running.
-                        </DialogContentText> */}
-                        <WorkoutSection />
+                        </DialogContentText>
+                        {/* <WorkoutSection /> */}
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={() => setEditDayWorkoutDialogOpen(false)}>Cancel</Button>
