@@ -1,5 +1,6 @@
 import { Box, Button, Card, CardActions, CardContent, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, FormControl, InputLabel, MenuItem, Select, Stack, Typography, Chip } from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useEffect, useState } from "react";
@@ -20,8 +21,12 @@ function AddWodPage() {
     const [addNewProgramDialogOpen, setAddNewProgramDialogOpen] = useState(false);
     const [editDayWorkoutDialogOpen, setEditDayWorkoutDialogOpen] = useState(false);
     const [isCalendarExpanded, setIsCalendarExpanded] = useState(false);
-    const [currentDayOfWeek, setCurrentDayOfWeek] = useState(3);
     const [selectedDate, setSelectedDate] = useState<Dayjs | null>(dayjs());
+    const [currentDayOfWeek, setCurrentDayOfWeek] = useState(() => {
+        const today = dayjs();
+        const start = today.startOf('week');
+        return today.diff(start, 'day') + 1; // 1-indexed
+    });
     const [weekDates, setWeekDates] = useState<Dayjs[]>([]);
 
     const getWeekFromDate = (date: Dayjs) => {
@@ -214,6 +219,16 @@ function AddWodPage() {
                                                         mt: 0.25,
                                                     }} />
                                                 )} */}
+
+                                                {today && (
+                                                    <Chip
+                                                        label="Today"
+                                                        size="small"
+                                                        color="primary"
+                                                        variant={selected ? 'filled' : 'outlined'}
+                                                        sx={{ height: 18, fontSize: '0.6rem', fontWeight: 700 }}
+                                                    />
+                                                )}
                                             </Button>
                                         );
                                     })}
@@ -277,35 +292,33 @@ function AddWodPage() {
                                                                 mb: 0.25,
                                                             }}>
                                                                 {date.format('ddd').toUpperCase()}
+
+
+
                                                             </Typography>
                                                             <Typography variant="body2" sx={{ fontWeight: 600, color: selected ? 'primary.dark' : 'text.primary' }}>
                                                                 {date.format('MMM D')}
                                                             </Typography>
+
                                                         </Box>
-                                                        {today && (
-                                                            <Chip
-                                                                label="Today"
+
+
+                                                        {/* Add exercise — only on selected */}
+                                                        {selected && (
+                                                            <Button
                                                                 size="small"
-                                                                color="primary"
-                                                                variant={selected ? 'filled' : 'outlined'}
-                                                                sx={{ height: 18, fontSize: '0.6rem', fontWeight: 700 }}
-                                                            />
+                                                                variant="outlined"
+                                                                startIcon={<EditIcon />}
+                                                                disableElevation
+                                                                sx={{ borderRadius: 1.5, fontSize: '0.75rem', p: 0 }}
+                                                                onClick={() => setEditDayWorkoutDialogOpen(true)}
+                                                            >
+                                                                Edit
+                                                            </Button>
                                                         )}
                                                     </Box>
 
-                                                    {/* Add exercise — only on selected */}
-                                                    {selected && (
-                                                        <Button
-                                                            size="small"
-                                                            variant="outlined"
-                                                            startIcon={<AddIcon />}
-                                                            disableElevation
-                                                            sx={{ borderRadius: 1.5, fontSize: '0.75rem', mt: 'auto' }}
-                                                            onClick={() => setEditDayWorkoutDialogOpen(true)}
-                                                        >
-                                                            Edit exercise
-                                                        </Button>
-                                                    )}
+
 
 
                                                     {/* <Divider sx={{ opacity: 0.5 }} /> */}

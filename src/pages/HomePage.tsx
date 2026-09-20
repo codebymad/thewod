@@ -5,8 +5,37 @@ import WorkoutSection from "../components/WorkoutSection"
 import LogScore from "../components/LogScore";
 import ScoreHistory from "../components/ScoreHistory";
 import QuoteOfTheDay from "../components/Quote";
+import { useEffect, useState } from "react";
+import { getDailyWod } from "../libs/SupabaseEdge";
 
 function HomePage() {
+
+  const [wod, setWod] = useState(null);
+
+  function getWodInputDate(display_for: string) {
+    const now = new Date();
+    if (display_for === 'ui') {
+      return now.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric"
+      });
+    } else {
+      const mm = String(now.getMonth() + 1).padStart(2, "0");
+      const dd = String(now.getDate()).padStart(2, "0");
+      const yyyy = String(now.getFullYear());
+
+      return `${dd}${mm}${yyyy}`;
+    }
+  }
+
+  useEffect(() => {
+    async function load() {
+      const data = await getDailyWod(getWodInputDate(''));
+      setWod(data);
+    }
+    load();
+  }, []);
 
   return (
     <>
@@ -44,7 +73,7 @@ function HomePage() {
             >
               <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>Prev</Box>
             </Button>
-            <Typography variant="h6">Sep 11, 2026</Typography>
+            <Typography variant="h6">{getWodInputDate('ui')}</Typography>
             <Button
               variant="outlined"
               endIcon={<ArrowForwardIcon />}
@@ -61,7 +90,7 @@ function HomePage() {
 
           <Paper sx={{ p: 2, backgroundColor: 'background.paper', boxShadow: '0 10px 30px rgbx(0,0,0,0.08)' }}>
 
-            <WorkoutSection />
+            <WorkoutSection workout={wod} />
 
           </Paper>
 
@@ -69,7 +98,7 @@ function HomePage() {
 
 
 
-        <Stack spacing={2}>
+        <Stack spacing={2} sx={{ pointerEvents: 'none', opacity: 0.5 }}>
 
           <QuoteOfTheDay />
 
