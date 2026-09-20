@@ -26,6 +26,59 @@ function WorkoutSection({ workout }: Props) {
     const toTitleCase = (str: string) =>
         str.replace(/\w\S*/g, (w) => w[0].toUpperCase() + w.slice(1).toLowerCase());
 
+
+    function normalizeMarkdown(input: string): string {
+        if (!input || typeof input !== "string") return "";
+
+        let text = input.trim();
+
+        // 1. Normalize line endings
+        text = text.replace(/\r\n/g, "\n");
+
+        // 2. Convert HTML tags to plain text (basic)
+        text = text
+            .replace(/<\/?p>/gi, "\n\n")
+            .replace(/<\/?br\s*\/?>/gi, "\n")
+            .replace(/<\/?strong>/gi, "**")
+            .replace(/<\/?em>/gi, "*")
+            .replace(/<\/?b>/gi, "**")
+            .replace(/<\/?i>/gi, "*")
+            .replace(/<\/?h[1-6]>/gi, "\n\n");
+
+        // 3. Normalize separators (----- or ==== → ---)
+        text = text.replace(/[-=]{3,}/g, "\n---\n");
+
+        // 4. Convert "NOTES:" to markdown heading
+        text = text.replace(/^NOTES:?/gim, "### Notes");
+
+        // 5. Ensure bullet points are markdown-friendly
+        text = text.replace(/^\s*[-•]\s*/gm, "- ");
+
+        // 6. Convert single line breaks into paragraphs
+        // (but keep existing markdown lists, headings, and code blocks intact)
+        text = text
+            .split("\n")
+            .map((line) => {
+                if (
+                    line.match(/^\s*[-*+]\s+/) || // list
+                    line.match(/^#{1,6}\s+/) || // heading
+                    line.match(/^>\s+/) || // blockquote
+                    line.match(/^```/) || // code fence
+                    line.trim() === "" // empty line
+                ) {
+                    return line;
+                }
+                return line + "\n";
+            })
+            .join("\n");
+
+        // 7. Collapse excessive blank lines
+        text = text.replace(/\n{3,}/g, "\n\n");
+
+        return text.trim();
+    }
+
+
     return (
         <Box sx={{ p: 0 }}>
             <Typography variant="h4" color="secondary" gutterBottom sx={{
@@ -73,13 +126,35 @@ function WorkoutSection({ workout }: Props) {
                     </AccordionSummary>
                     <AccordionDetails sx={{ p: 2 }}>
                         <Stack spacing={2}>
-                            <Box>
-                                {/* <Typography variant="subtitle2" sx={{ color: 'primary.main', mb: 0.5, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                                    General Warm Up:
-                                </Typography> */}
-                                <Typography variant="body2" sx={{ color: 'text.primary', lineHeight: 1.6 }}>
-                                    <ReactMarkdown>{section.section_content}</ReactMarkdown>
-                                </Typography>
+                            <Box
+                                sx={{
+                                    color: 'text.primary',
+                                    lineHeight: 1.6,
+                                    fontSize: '0.875rem', // matches body2
+                                    // Prevent any child from overflowing
+                                    overflowX: 'hidden',
+                                    wordBreak: 'break-word',
+                                    '& pre': {
+                                        overflowX: 'auto',
+                                        maxWidth: '100%',
+                                        whiteSpace: 'pre-wrap',
+                                    },
+                                    '& code': {
+                                        wordBreak: 'break-all',
+                                    },
+                                    '& table': {
+                                        display: 'block',
+                                        overflowX: 'auto',
+                                        maxWidth: '100%',
+                                    },
+                                    '& img': {
+                                        maxWidth: '100%',
+                                        height: 'auto',
+                                    },
+                                    '& p': { margin: '0 0 8px 0' },
+                                }}
+                            >
+                                <ReactMarkdown>{normalizeMarkdown(section.section_content)}</ReactMarkdown>
                             </Box>
 
                             {/* <Box sx={{ display: 'flex', gap: 3, pb: 1 }}>

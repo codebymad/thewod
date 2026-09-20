@@ -154,9 +154,11 @@ function HomePage() {
           display: "grid",
           gridTemplateColumns: { xs: "1fr", md: "6fr 4fr" },
           gap: 3,
+          minWidth: 0,      // ← add this
+          overflow: 'hidden', // ← add this
         }}
       >
-        <Box>
+        <Box sx={{ minWidth: 0, overflow: 'hidden' }}>
           {/* Date Navigation */}
           <Box
             sx={{
@@ -208,6 +210,8 @@ function HomePage() {
               p: 2,
               backgroundColor: "background.paper",
               boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
+              overflow: 'hidden',   // ← add this
+              minWidth: 0,          // ← add this
             }}
           >
             <WorkoutSection workout={wod} />
