@@ -95,55 +95,67 @@ function WorkoutSection({ workout }: Props) {
 
 
                             {section.section_notes && (
-                                <Accordion
-                                    sx={{
-                                        bgcolor: 'action.hover',
-                                        borderRadius: '8px !important',
-                                        border: '1px solid',
-                                        borderColor: 'divider',
-                                        '&:before': { display: 'none' }
-                                    }}
-                                >
-                                    <AccordionSummary
-                                        expandIcon={<ExpandMoreIcon />}
-                                        sx={{ px: 1 }}
-                                    >
-                                        <Typography variant="subtitle2" sx={{ fontWeight: 800, color: 'primary.main', fontSize: 13, display: 'flex', alignItems: 'center', gap: 1 }}>
-                                            💡 Note
+
+                                <Stack spacing={1.2}>
+                                    {section.section_notes?.map((note, idx) => (
+                                        <Typography
+                                            key={idx}
+                                            variant="caption"
+                                            sx={{ color: 'text.primary', fontWeight: 500, display: 'block', lineHeight: 1.4 }}
+                                        >
+                                            <ReactMarkdown>{note}</ReactMarkdown>
                                         </Typography>
-                                    </AccordionSummary>
-                                    <AccordionDetails sx={{ p: 1 }}>
-                                        {/* <Typography variant="body2" sx={{ color: 'text.primary', mb: 1.5, fontWeight: 500, fontSize: 13 }}>
-                                            Remember to warm up before starting your workout to prevent injuries and improve performance.
-                                        </Typography> */}
+                                    ))}
+                                </Stack>
+                                // <Accordion
+                                //     sx={{
+                                //         bgcolor: 'action.hover',
+                                //         borderRadius: '8px !important',
+                                //         border: '1px solid',
+                                //         borderColor: 'divider',
+                                //         '&:before': { display: 'none' }
+                                //     }}
+                                // >
+                                //     <AccordionSummary
+                                //         expandIcon={<ExpandMoreIcon />}
+                                //         sx={{ px: 1 }}
+                                //     >
+                                //         <Typography variant="subtitle2" sx={{ fontWeight: 800, color: 'primary.main', fontSize: 13, display: 'flex', alignItems: 'center', gap: 1 }}>
+                                //             💡 Note
+                                //         </Typography>
+                                //     </AccordionSummary>
+                                //     <AccordionDetails sx={{ p: 1 }}>
+                                //         {/* <Typography variant="body2" sx={{ color: 'text.primary', mb: 1.5, fontWeight: 500, fontSize: 13 }}>
+                                //             Remember to warm up before starting your workout to prevent injuries and improve performance.
+                                //         </Typography> */}
 
-                                        <Stack spacing={1.2}>
-                                            {/* <Box>
-                                                <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.primary', display: 'block', mb: 0.2 }}>
-                                                    Stimulus and Strategy:
-                                                </Typography>
-                                                <Typography variant="caption" sx={{ color: 'text.primary', fontWeight: 500, display: 'block', lineHeight: 1.4 }}>
-                                                    Today's workout is the CrossFit benchmark Andi. We last completed this workout in April, so you have an opportunity see if you can improve your time.
-                                                </Typography>
-                                            </Box> */}
+                                //         <Stack spacing={1.2}>
+                                //             {/* <Box>
+                                //                 <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.primary', display: 'block', mb: 0.2 }}>
+                                //                     Stimulus and Strategy:
+                                //                 </Typography>
+                                //                 <Typography variant="caption" sx={{ color: 'text.primary', fontWeight: 500, display: 'block', lineHeight: 1.4 }}>
+                                //                     Today's workout is the CrossFit benchmark Andi. We last completed this workout in April, so you have an opportunity see if you can improve your time.
+                                //                 </Typography>
+                                //             </Box> */}
 
-                                            <Stack spacing={1.2}>
-                                                {section.section_notes?.map((note, idx) => (
-                                                    <Typography
-                                                        key={idx}
-                                                        variant="caption"
-                                                        sx={{ color: 'text.primary', fontWeight: 500, display: 'block', lineHeight: 1.4 }}
-                                                    >
-                                                        <ReactMarkdown>{note}</ReactMarkdown>
-                                                    </Typography>
-                                                ))}
-                                            </Stack>
+                                //             <Stack spacing={1.2}>
+                                //                 {section.section_notes?.map((note, idx) => (
+                                //                     <Typography
+                                //                         key={idx}
+                                //                         variant="caption"
+                                //                         sx={{ color: 'text.primary', fontWeight: 500, display: 'block', lineHeight: 1.4 }}
+                                //                     >
+                                //                         <ReactMarkdown>{note}</ReactMarkdown>
+                                //                     </Typography>
+                                //                 ))}
+                                //             </Stack>
 
-                                        </Stack>
+                                //         </Stack>
 
 
-                                    </AccordionDetails>
-                                </Accordion>
+                                //     </AccordionDetails>
+                                // </Accordion>
                             )}
 
                         </Stack>
