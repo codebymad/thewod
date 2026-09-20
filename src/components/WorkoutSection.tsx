@@ -35,7 +35,7 @@ function WorkoutSection({ workout }: Props) {
                 {workout?.workout_name}
             </Typography>
 
-            {workout?.sections.map((section, index) => (
+            {workout?.sections.map((section, _) => (
                 <Accordion
                     defaultExpanded
                     sx={{
