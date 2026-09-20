@@ -7,10 +7,13 @@ import ScoreHistory from "../components/ScoreHistory";
 import QuoteOfTheDay from "../components/Quote";
 import { useEffect, useState } from "react";
 import { getDailyWod } from "../libs/SupabaseEdge";
+import Backdrop from '@mui/material/Backdrop';
+import CircularProgress from '@mui/material/CircularProgress';
 
 function HomePage() {
 
   const [wod, setWod] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   function getWodInputDate(display_for: string) {
     const now = new Date();
@@ -31,87 +34,115 @@ function HomePage() {
 
   useEffect(() => {
     async function load() {
-      const data = await getDailyWod(getWodInputDate(''));
-      setWod(data);
+      setLoading(true);
+      try {
+        const data = await getDailyWod(getWodInputDate(''));
+        setWod(data);
+      } finally {
+        setLoading(false);
+      }
     }
     load();
   }, []);
 
-  return (
-    <>
-      <Box sx={{ display: 'flex', justifyContent: { xs: 'center', md: 'flex-start' }, mb: { xs: 1, md: 3 } }}>
-        <Typography variant="h3" component="h1"
-          sx={{
-            fontWeight: 700,
-            fontSize: { xs: '1.5rem', md: '3rem' },
-            textAlign: 'center'
-          }}
-        >
-          Today's Workout
-        </Typography>
-      </Box>
+  if (loading) {
+    return (
+      <Backdrop
+        sx={(theme) => ({
+          color: '#fff',
+          zIndex: theme.zIndex.drawer + 1,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 2
+        })}
+        open={loading}
+      >
+        <CircularProgress color="inherit" />
+        <Typography variant="body2">Fetching…</Typography>
+      </Backdrop>
+    );
+  }
+  else {
+    return (
 
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '6fr 4fr' }, gap: 3 }}>
-
-
-        <Box>
-          <Box sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            mb: 2
-          }}>
-            <Button
-              variant="outlined"
-              startIcon={<ArrowBackIcon />}
-              sx={{
-                minWidth: { xs: 'auto' },
-                '& .MuiButton-startIcon': { mr: { xs: 0, sm: 1 } },
-                '& .MuiButton-label': { display: { xs: 'none', sm: 'inline' } },
-                '& .MuiButton-text': { display: { xs: 'none', sm: 'inline' } }
-              }}
-            >
-              <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>Prev</Box>
-            </Button>
-            <Typography variant="h6">{getWodInputDate('ui')}</Typography>
-            <Button
-              variant="outlined"
-              endIcon={<ArrowForwardIcon />}
-              sx={{
-                minWidth: { xs: 'auto' },
-                '& .MuiButton-endIcon': { ml: { xs: 0, sm: 1 } },
-                '& .MuiButton-label': { display: { xs: 'none', sm: 'inline' } },
-                '& .MuiButton-text': { display: { xs: 'none', sm: 'inline' } }
-              }}
-            >
-              <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>Next</Box>
-            </Button>
-          </Box>
-
-          <Paper sx={{ p: 2, backgroundColor: 'background.paper', boxShadow: '0 10px 30px rgbx(0,0,0,0.08)' }}>
-
-            <WorkoutSection workout={wod} />
-
-          </Paper>
-
+      <>
+        <Box sx={{ display: 'flex', justifyContent: { xs: 'center', md: 'flex-start' }, mb: { xs: 1, md: 3 } }}>
+          <Typography variant="h3" component="h1"
+            sx={{
+              fontWeight: 700,
+              fontSize: { xs: '1.5rem', md: '3rem' },
+              textAlign: 'center'
+            }}
+          >
+            Today's Workout
+          </Typography>
         </Box>
 
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '6fr 4fr' }, gap: 3 }}>
 
 
-        <Stack spacing={2} sx={{ pointerEvents: 'none', opacity: 0.5 }}>
+          <Box>
+            <Box sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              mb: 2
+            }}>
+              <Button
+                variant="outlined"
+                startIcon={<ArrowBackIcon />}
+                sx={{
+                  minWidth: { xs: 'auto' },
+                  '& .MuiButton-startIcon': { mr: { xs: 0, sm: 1 } },
+                  '& .MuiButton-label': { display: { xs: 'none', sm: 'inline' } },
+                  '& .MuiButton-text': { display: { xs: 'none', sm: 'inline' } }
+                }}
+              >
+                <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>Prev</Box>
+              </Button>
+              <Typography variant="h6">{getWodInputDate('ui')}</Typography>
+              <Button
+                variant="outlined"
+                endIcon={<ArrowForwardIcon />}
+                sx={{
+                  minWidth: { xs: 'auto' },
+                  '& .MuiButton-endIcon': { ml: { xs: 0, sm: 1 } },
+                  '& .MuiButton-label': { display: { xs: 'none', sm: 'inline' } },
+                  '& .MuiButton-text': { display: { xs: 'none', sm: 'inline' } }
+                }}
+              >
+                <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>Next</Box>
+              </Button>
+            </Box>
 
-          <QuoteOfTheDay />
+            <Paper sx={{ p: 2, backgroundColor: 'background.paper', boxShadow: '0 10px 30px rgbx(0,0,0,0.08)' }}>
 
-          <LogScore />
+              <WorkoutSection workout={wod} />
 
-          <ScoreHistory />
+            </Paper>
 
-        </Stack>
+          </Box>
 
 
-      </Box>
-    </>
-  )
+
+          <Stack spacing={2} sx={{ pointerEvents: 'none', opacity: 0.5 }}>
+
+            <QuoteOfTheDay />
+
+            <LogScore />
+
+            <ScoreHistory />
+
+          </Stack>
+
+
+        </Box>
+      </>
+    )
+  }
+
+
+
 }
 
 export default HomePage
