@@ -23,6 +23,8 @@ interface Props {
 
 function WorkoutSection({ workout }: Props) {
 
+    console.log(workout)
+
     const toTitleCase = (str: string) =>
         str.replace(/\w\S*/g, (w) => w[0].toUpperCase() + w.slice(1).toLowerCase());
 
@@ -98,66 +100,79 @@ function WorkoutSection({ workout }: Props) {
             </Box>
 
 
-
-            {workout?.sections.map((section, _) => (
-                <Accordion
-                    defaultExpanded
+            {(!workout?.sections || workout.sections.length === 0) ? (
+                <Typography
+                    variant="h6"
                     sx={{
-                        // maxWidth: 600, 
-                        pl: 1,
-                        borderRadius: '12px !important',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                        '&:before': { display: 'none' }, // Removes the default MUI accordion line
-                        border: '1px solid',
-                        borderColor: 'divider',
-                        mb: 2
+                        textAlign: 'center',
+                        py: 4,
+                        fontWeight: 700,
+                        color: 'text.primary'
                     }}
                 >
-                    <AccordionSummary
-                        expandIcon={<ExpandMoreIcon />}
-                        aria-controls={`accordion1-panel`}
-                        id={`accordion1-header`}
-                        sx={{ px: 2 }}
+                    Rest Day
+                </Typography>
+            ) : (
+                workout?.sections.map((section, idx) => (
+                    <Accordion
+                        key={section.section_name || idx}
+                        defaultExpanded
+                        sx={{
+                            // maxWidth: 600, 
+                            pl: 1,
+                            borderRadius: '12px !important',
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                            '&:before': { display: 'none' }, // Removes the default MUI accordion line
+                            border: '1px solid',
+                            borderColor: 'divider',
+                            mb: 2
+                        }}
                     >
+                        <AccordionSummary
+                            expandIcon={<ExpandMoreIcon />}
+                            aria-controls={`accordion1-panel`}
+                            id={`accordion1-header`}
+                            sx={{ px: 2 }}
+                        >
 
-                        <Typography variant="h6" component="div" sx={{ color: 'text.primary', fontSize: 17, fontWeight: 700 }}>
-                            <Checkbox icon={<RadioButtonUncheckedIcon />} checkedIcon={<TaskAltIcon />} /> {toTitleCase(section.section_name)}
-                        </Typography>
-                    </AccordionSummary>
-                    <AccordionDetails sx={{ p: 2 }}>
-                        <Stack spacing={2}>
-                            <Box
-                                sx={{
-                                    color: 'text.primary',
-                                    lineHeight: 1.6,
-                                    fontSize: '0.875rem', // matches body2
-                                    // Prevent any child from overflowing
-                                    overflowX: 'hidden',
-                                    wordBreak: 'break-word',
-                                    '& pre': {
-                                        overflowX: 'auto',
-                                        maxWidth: '100%',
-                                        whiteSpace: 'pre-wrap',
-                                    },
-                                    '& code': {
-                                        wordBreak: 'break-all',
-                                    },
-                                    '& table': {
-                                        display: 'block',
-                                        overflowX: 'auto',
-                                        maxWidth: '100%',
-                                    },
-                                    '& img': {
-                                        maxWidth: '100%',
-                                        height: 'auto',
-                                    },
-                                    '& p': { margin: '0 0 8px 0' },
-                                }}
-                            >
-                                <ReactMarkdown>{normalizeMarkdown(section.section_content)}</ReactMarkdown>
-                            </Box>
+                            <Typography variant="h6" component="div" sx={{ color: 'text.primary', fontSize: 17, fontWeight: 700 }}>
+                                <Checkbox icon={<RadioButtonUncheckedIcon />} checkedIcon={<TaskAltIcon />} /> {toTitleCase(section.section_name)}
+                            </Typography>
+                        </AccordionSummary>
+                        <AccordionDetails sx={{ p: 2 }}>
+                            <Stack spacing={2}>
+                                <Box
+                                    sx={{
+                                        color: 'text.primary',
+                                        lineHeight: 1.6,
+                                        fontSize: '0.875rem', // matches body2
+                                        // Prevent any child from overflowing
+                                        overflowX: 'hidden',
+                                        wordBreak: 'break-word',
+                                        '& pre': {
+                                            overflowX: 'auto',
+                                            maxWidth: '100%',
+                                            whiteSpace: 'pre-wrap',
+                                        },
+                                        '& code': {
+                                            wordBreak: 'break-all',
+                                        },
+                                        '& table': {
+                                            display: 'block',
+                                            overflowX: 'auto',
+                                            maxWidth: '100%',
+                                        },
+                                        '& img': {
+                                            maxWidth: '100%',
+                                            height: 'auto',
+                                        },
+                                        '& p': { margin: '0 0 8px 0' },
+                                    }}
+                                >
+                                    <ReactMarkdown>{normalizeMarkdown(section.section_content)}</ReactMarkdown>
+                                </Box>
 
-                            {/* <Box sx={{ display: 'flex', gap: 3, pb: 1 }}>
+                                {/* <Box sx={{ display: 'flex', gap: 3, pb: 1 }}>
                                 <Typography variant="caption" sx={{ color: 'text.primary', fontWeight: 600, bgcolor: 'action.hover', px: 1, py: 0.2, borderRadius: 1 }}>
                                     Take your time
                                 </Typography>
@@ -166,78 +181,79 @@ function WorkoutSection({ workout }: Props) {
                                 </Typography>
                             </Box> */}
 
-                            <Divider />
+                                <Divider />
 
 
-                            {section.section_notes && (
+                                {section.section_notes && (
 
-                                <Stack spacing={1.2}>
-                                    {section.section_notes?.map((note, idx) => (
-                                        <Typography
-                                            key={idx}
-                                            variant="caption"
-                                            sx={{ color: 'text.primary', fontWeight: 500, display: 'block', lineHeight: 1.4 }}
-                                        >
-                                            <ReactMarkdown>{note}</ReactMarkdown>
-                                        </Typography>
-                                    ))}
-                                </Stack>
-                                // <Accordion
-                                //     sx={{
-                                //         bgcolor: 'action.hover',
-                                //         borderRadius: '8px !important',
-                                //         border: '1px solid',
-                                //         borderColor: 'divider',
-                                //         '&:before': { display: 'none' }
-                                //     }}
-                                // >
-                                //     <AccordionSummary
-                                //         expandIcon={<ExpandMoreIcon />}
-                                //         sx={{ px: 1 }}
-                                //     >
-                                //         <Typography variant="subtitle2" sx={{ fontWeight: 800, color: 'primary.main', fontSize: 13, display: 'flex', alignItems: 'center', gap: 1 }}>
-                                //             💡 Note
-                                //         </Typography>
-                                //     </AccordionSummary>
-                                //     <AccordionDetails sx={{ p: 1 }}>
-                                //         {/* <Typography variant="body2" sx={{ color: 'text.primary', mb: 1.5, fontWeight: 500, fontSize: 13 }}>
-                                //             Remember to warm up before starting your workout to prevent injuries and improve performance.
-                                //         </Typography> */}
+                                    <Stack spacing={1.2}>
+                                        {section.section_notes?.map((note, idx) => (
+                                            <Typography
+                                                key={idx}
+                                                variant="caption"
+                                                sx={{ color: 'text.primary', fontWeight: 500, display: 'block', lineHeight: 1.4 }}
+                                            >
+                                                <ReactMarkdown>{note}</ReactMarkdown>
+                                            </Typography>
+                                        ))}
+                                    </Stack>
+                                    // <Accordion
+                                    //     sx={{
+                                    //         bgcolor: 'action.hover',
+                                    //         borderRadius: '8px !important',
+                                    //         border: '1px solid',
+                                    //         borderColor: 'divider',
+                                    //         '&:before': { display: 'none' }
+                                    //     }}
+                                    // >
+                                    //     <AccordionSummary
+                                    //         expandIcon={<ExpandMoreIcon />}
+                                    //         sx={{ px: 1 }}
+                                    //     >
+                                    //         <Typography variant="subtitle2" sx={{ fontWeight: 800, color: 'primary.main', fontSize: 13, display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    //             💡 Note
+                                    //         </Typography>
+                                    //     </AccordionSummary>
+                                    //     <AccordionDetails sx={{ p: 1 }}>
+                                    //         {/* <Typography variant="body2" sx={{ color: 'text.primary', mb: 1.5, fontWeight: 500, fontSize: 13 }}>
+                                    //             Remember to warm up before starting your workout to prevent injuries and improve performance.
+                                    //         </Typography> */}
 
-                                //         <Stack spacing={1.2}>
-                                //             {/* <Box>
-                                //                 <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.primary', display: 'block', mb: 0.2 }}>
-                                //                     Stimulus and Strategy:
-                                //                 </Typography>
-                                //                 <Typography variant="caption" sx={{ color: 'text.primary', fontWeight: 500, display: 'block', lineHeight: 1.4 }}>
-                                //                     Today's workout is the CrossFit benchmark Andi. We last completed this workout in April, so you have an opportunity see if you can improve your time.
-                                //                 </Typography>
-                                //             </Box> */}
+                                    //         <Stack spacing={1.2}>
+                                    //             {/* <Box>
+                                    //                 <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.primary', display: 'block', mb: 0.2 }}>
+                                    //                     Stimulus and Strategy:
+                                    //                 </Typography>
+                                    //                 <Typography variant="caption" sx={{ color: 'text.primary', fontWeight: 500, display: 'block', lineHeight: 1.4 }}>
+                                    //                     Today's workout is the CrossFit benchmark Andi. We last completed this workout in April, so you have an opportunity see if you can improve your time.
+                                    //                 </Typography>
+                                    //             </Box> */}
 
-                                //             <Stack spacing={1.2}>
-                                //                 {section.section_notes?.map((note, idx) => (
-                                //                     <Typography
-                                //                         key={idx}
-                                //                         variant="caption"
-                                //                         sx={{ color: 'text.primary', fontWeight: 500, display: 'block', lineHeight: 1.4 }}
-                                //                     >
-                                //                         <ReactMarkdown>{note}</ReactMarkdown>
-                                //                     </Typography>
-                                //                 ))}
-                                //             </Stack>
+                                    //             <Stack spacing={1.2}>
+                                    //                 {section.section_notes?.map((note, idx) => (
+                                    //                     <Typography
+                                    //                         key={idx}
+                                    //                         variant="caption"
+                                    //                         sx={{ color: 'text.primary', fontWeight: 500, display: 'block', lineHeight: 1.4 }}
+                                    //                     >
+                                    //                         <ReactMarkdown>{note}</ReactMarkdown>
+                                    //                     </Typography>
+                                    //                 ))}
+                                    //             </Stack>
 
-                                //         </Stack>
+                                    //         </Stack>
 
 
-                                //     </AccordionDetails>
-                                // </Accordion>
-                            )}
+                                    //     </AccordionDetails>
+                                    // </Accordion>
+                                )}
 
-                        </Stack>
-                    </AccordionDetails>
-                </Accordion>
-            ))}
+                            </Stack>
+                        </AccordionDetails>
+                    </Accordion>
 
+                )))
+            }
 
 
 

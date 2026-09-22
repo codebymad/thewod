@@ -81,7 +81,7 @@ function HomePage() {
         }
 
         setWod(result.data);
-        setApirespmetadata(result.meta);
+        setApirespmetadata(result.id);
       } finally {
         setLoading(false);
       }

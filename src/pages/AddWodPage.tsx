@@ -56,8 +56,8 @@ interface ApiSection {
 }
 
 interface ApiWodItem {
-    seed: number; // DDMMYYYY
-    object: {
+    id: string; // DDMMYYYY
+    data: {
         workout_id: string;
         workout_name: string;
         sections: ApiSection[];
@@ -79,17 +79,28 @@ function seedToDateKey(seed: number): string {
 function parseWodData(items: ApiWodItem[]): Record<string, DayWorkout> {
     const result: Record<string, DayWorkout> = {};
     for (const item of items) {
-        const dateKey = seedToDateKey(item.seed);
-        const obj = item.object;
+        const dateKey = seedToDateKey(Number(item.id.split("_")[0]));
+        const obj = item.data;
         result[dateKey] = {
-            id: obj.workout_id || uuid(),
-            name: obj.workout_name || dateKey,
-            sections: obj.sections.map((sec) => ({
-                id: uuid(),
-                type: sec.section_name as SectionType,
-                content: sec.section_content,
-                notes: sec.section_notes?.join("\n") ?? "",
-            })),
+            id: obj?.workout_id ?? uuid(),
+            name: obj?.workout_name ?? dateKey,
+            sections:
+                (obj?.sections?.length ?? 0) === 0
+                    ? [
+                        {
+                            id: uuid(),
+                            type: "rest" as SectionType,
+                            content: "### Hydrate, Stretch, Walk and Enjoy your Day!",
+                            notes: "",
+                        },
+                    ]
+                    : obj.sections.map((sec) => ({
+                        id: uuid(),
+                        type: sec.section_name as SectionType,
+                        content: sec.section_content,
+                        notes: sec.section_notes?.join("\n") ?? "",
+                    })),
+
         };
     }
     return result;

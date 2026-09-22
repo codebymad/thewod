@@ -26,20 +26,10 @@ export async function callEdgeFunction(path: string, query: Record<string, strin
 export async function getDailyWod(input: string) {
     const res = await callEdgeFunction("daily-wod", { input });
 
-    if (!res || !res.object) return null;
-
-    const meta =
-        res.bucket.name +
-        "_" +
-        res.folder.name +
-        "_" +
-        res.file.name +
-        "_" +
-        res.objectIndex;
-
+    if (!res || !res.data) return null;
     return {
-        data: res.object,
-        meta,
+        data: res.data,
+        id: res.id,
     };
 }
 
