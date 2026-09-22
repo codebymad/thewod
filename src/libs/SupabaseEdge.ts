@@ -42,3 +42,14 @@ export async function getDailyWod(input: string) {
         meta,
     };
 }
+
+export async function getWeeklyWod(week: number, year: number) {
+    const res = await callEdgeFunction("weekly-wod", {
+        week: String(week),
+        year: String(year),
+    });
+
+    if (!res || !Array.isArray(res)) return null;
+
+    return res;
+}

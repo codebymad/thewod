@@ -14,7 +14,7 @@ import { Collapse, List, ListItem, ListItemButton, ListItemText } from '@mui/mat
 
 const menuItems = [
     { label: 'Home', path: '/home' },
-    { label: 'Programs', path: '/programs' },
+   // { label: 'Programs', path: '/programs' },
     { label: 'Add Workout', path: '/addworkout' },
     // { label: 'History', path: '/history' },
     // { label: 'Results', path: '/results' },
