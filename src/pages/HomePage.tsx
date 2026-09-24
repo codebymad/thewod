@@ -6,91 +6,127 @@ import LogScore from "../components/LogScore";
 import ScoreHistory from "../components/ScoreHistory";
 import QuoteOfTheDay from "../components/Quote";
 import { useEffect, useState } from "react";
-import { getDailyWod } from "../libs/SupabaseEdge";
+import { getDailyWodDB_HOME } from "../libs/SupabaseEdge";
 import Backdrop from "@mui/material/Backdrop";
 import CircularProgress from "@mui/material/CircularProgress";
+import type { WorkoutObject } from "../components/WorkoutSection";
+
+// ── Raw shape returned by getDailyWodDB_HOME() ────────────────────────────────
+interface ApiSection {
+  section_name: string;
+  section_content: string;
+  section_notes?: string[];
+}
+
+interface ApiWorkout {
+  wod_id: string;
+  wod_name: string;
+  tags: string[];
+  content: ApiSection[];
+}
+
+interface ApiRecord {
+  workout_date: string; // "YYYY-MM-DD"
+  workout: ApiWorkout;
+}
+
+/** Map the API record into the shape WorkoutSection expects. */
+function toWorkoutObject(api: ApiWorkout): WorkoutObject {
+  return {
+    wod_id: api.wod_id,
+    wod_name: api.wod_name,
+    sections: api.content,
+    metadata: { tags: api.tags ?? [] },
+  };
+}
 
 function HomePage() {
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [wod, setWod] = useState(null);
-  const [apirespmetadata, setApirespmetadata] = useState(String);
+  const [records, setRecords] = useState<ApiRecord[]>([]);
+  const [dateIndex, setDateIndex] = useState<number>(0);
   const [loading, setLoading] = useState(true);
 
-  // Normalize date to midnight (fixes comparison issues)
-  function normalize(date: Date) {
-    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
-  }
-
-  // UI date formatting
-  function formatUiDate(date: Date) {
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  }
-
-  // API date formatting (DDMMYYYY)
-  function formatApiDate(date: Date) {
-    const mm = String(date.getMonth() + 1).padStart(2, "0");
-    const dd = String(date.getDate()).padStart(2, "0");
-    const yyyy = String(date.getFullYear());
-    return `${dd}${mm}${yyyy}`;
-  }
-
-  // Navigation limits: today ± 3 days
-  const today = normalize(new Date());
-  const minDate = normalize(new Date(today));
-  minDate.setDate(today.getDate() - 3);
-
-  const maxDate = normalize(new Date(today));
-  maxDate.setDate(today.getDate() + 3);
-
-  const normalizedCurrent = normalize(currentDate);
-
-  // Navigation handlers
-  function goPrev() {
-    const newDate = normalize(currentDate);
-    newDate.setDate(newDate.getDate() - 1);
-
-    if (newDate >= minDate) {
-      setCurrentDate(newDate);
-    }
-  }
-
-  function goNext() {
-    const newDate = normalize(currentDate);
-    newDate.setDate(newDate.getDate() + 1);
-
-    if (newDate <= maxDate) {
-      setCurrentDate(newDate);
-    }
-  }
-
-  // Fetch WOD whenever currentDate changes
+  // ── Load all records once ──────────────────────────────────────────────────
   useEffect(() => {
     async function load() {
       setLoading(true);
       try {
-        const result = await getDailyWod(formatApiDate(currentDate));
-
-        if (!result) {
-          setWod(null);
-          setApirespmetadata('');
+        const data: ApiRecord[] = await getDailyWodDB_HOME();
+        if (!data || data.length === 0) {
+          setRecords([]);
           return;
         }
 
-        setWod(result.data);
-        setApirespmetadata(result.id);
+        // Sort ascending so index 0 = earliest date
+        const sorted = [...data].sort((a, b) =>
+          a.workout_date.localeCompare(b.workout_date)
+        );
+        setRecords(sorted);
+
+        // Land on the record closest to today (prefer today, else nearest past)
+        const todayStr = todayIso();
+        let best = sorted.findIndex((r) => r.workout_date >= todayStr);
+        if (best === -1) best = sorted.length - 1;
+        setDateIndex(best);
       } finally {
         setLoading(false);
       }
     }
 
     load();
-  }, [currentDate]);
+  }, []);
 
-  // Loading UI
+  // ── Helpers ────────────────────────────────────────────────────────────────
+
+  function todayIso(): string {
+    const d = new Date();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `${d.getFullYear()}-${mm}-${dd}`;
+  }
+
+  function parseLocalDate(iso: string): Date {
+    const [y, m, day] = iso.split("-").map(Number);
+    return new Date(y, m - 1, day);
+  }
+
+  function formatUiDate(iso: string): string {
+    return parseLocalDate(iso).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  }
+
+  function getHeaderLabel(iso: string): string {
+    const today = todayIso();
+    if (iso === today) return "Today's Workout";
+    const diff =
+      (parseLocalDate(iso).getTime() - parseLocalDate(today).getTime()) /
+      86_400_000;
+    if (diff === 1) return "Tomorrow's Workout";
+    if (diff === -1) return "Yesterday's Workout";
+    return `${formatUiDate(iso)} Workout`;
+  }
+
+  // ── Navigation ─────────────────────────────────────────────────────────────
+  const hasPrev = dateIndex > 0;
+  const hasNext = dateIndex < records.length - 1;
+
+  function goPrev() {
+    if (hasPrev) setDateIndex((i) => i - 1);
+  }
+
+  function goNext() {
+    if (hasNext) setDateIndex((i) => i + 1);
+  }
+
+  // ── Current record ─────────────────────────────────────────────────────────
+  const current = records[dateIndex];
+  const workout: WorkoutObject | null = current
+    ? toWorkoutObject(current.workout)
+    : null;
+
+  // ── Loading UI ─────────────────────────────────────────────────────────────
   if (loading) {
     return (
       <Backdrop
@@ -109,24 +145,16 @@ function HomePage() {
     );
   }
 
-  function getHeaderLabel(date: Date) {
-    const today = normalize(new Date());
-    const target = normalize(date);
-
-    const diffDays = Math.floor(
-      (target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+  // ── Empty state ─────────────────────────────────────────────────────────────
+  if (records.length === 0) {
+    return (
+      <Typography variant="h6" sx={{ textAlign: "center", mt: 6 }}>
+        No workouts found.
+      </Typography>
     );
-
-    if (diffDays === 0) return "Today's Workout";
-    if (diffDays === 1) return "Tomorrow's Workout";
-    if (diffDays === -1) return "Yesterday's Workout";
-
-    // For other days, show formatted date
-    return `${formatUiDate(date)} Workout`;
   }
 
-
-  // Main UI
+  // ── Main UI ─────────────────────────────────────────────────────────────────
   return (
     <>
       <Box
@@ -145,7 +173,7 @@ function HomePage() {
             textAlign: "center",
           }}
         >
-          {getHeaderLabel(currentDate)}
+          {current ? getHeaderLabel(current.workout_date) : ""}
         </Typography>
       </Box>
 
@@ -154,12 +182,12 @@ function HomePage() {
           display: "grid",
           gridTemplateColumns: { xs: "1fr", md: "6fr 4fr" },
           gap: 3,
-          minWidth: 0,      // ← add this
-          overflow: 'hidden', // ← add this
+          minWidth: 0,
+          overflow: "hidden",
         }}
       >
-        <Box sx={{ minWidth: 0, overflow: 'hidden' }}>
-          {/* Date Navigation */}
+        <Box sx={{ minWidth: 0, overflow: "hidden" }}>
+          {/* ── Date Navigation ── */}
           <Box
             sx={{
               display: "flex",
@@ -171,13 +199,11 @@ function HomePage() {
             <Button
               variant="outlined"
               startIcon={<ArrowBackIcon />}
-              disabled={normalizedCurrent <= minDate}
+              disabled={!hasPrev}
               onClick={goPrev}
               sx={{
                 minWidth: { xs: "auto" },
                 "& .MuiButton-startIcon": { mr: { xs: 0, sm: 1 } },
-                "& .MuiButton-label": { display: { xs: "none", sm: "inline" } },
-                "& .MuiButton-text": { display: { xs: "none", sm: "inline" } },
               }}
             >
               <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>
@@ -185,18 +211,18 @@ function HomePage() {
               </Box>
             </Button>
 
-            <Typography variant="h6">{formatUiDate(currentDate)}</Typography>
+            <Typography variant="h6">
+              {current ? formatUiDate(current.workout_date) : ""}
+            </Typography>
 
             <Button
               variant="outlined"
               endIcon={<ArrowForwardIcon />}
-              disabled={normalizedCurrent >= maxDate}
+              disabled={!hasNext}
               onClick={goNext}
               sx={{
                 minWidth: { xs: "auto" },
                 "& .MuiButton-endIcon": { ml: { xs: 0, sm: 1 } },
-                "& .MuiButton-label": { display: { xs: "none", sm: "inline" } },
-                "& .MuiButton-text": { display: { xs: "none", sm: "inline" } },
               }}
             >
               <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>
@@ -210,31 +236,13 @@ function HomePage() {
               p: 2,
               backgroundColor: "background.paper",
               boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
-              overflow: 'hidden',   // ← add this
-              minWidth: 0,          // ← add this
+              overflow: "hidden",
+              minWidth: 0,
             }}
           >
-            <WorkoutSection workout={wod} />
+            <WorkoutSection workout={workout} />
           </Paper>
-
-          <Typography
-            variant="caption"
-            sx={{
-              fontStyle: "italic",
-              fontSize: "0.75rem",
-              bgcolor: "action.hover",
-              px: 1,
-              py: 0.2,
-              borderRadius: 1,
-              display: "inline-block",
-            }}
-          >
-            {apirespmetadata}
-          </Typography>
-
-
         </Box>
-
 
         <Stack spacing={2} sx={{ pointerEvents: "none", opacity: 0.5 }}>
           <QuoteOfTheDay />

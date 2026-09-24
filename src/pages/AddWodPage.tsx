@@ -1,10 +1,11 @@
 import {
-    Box, Button, Card, Chip, CircularProgress, Collapse, Dialog,
+    Alert, Box, Button, Card, Chip, CircularProgress, Collapse, Dialog,
     DialogActions, DialogContent, DialogTitle, Divider, FormControl,
-    IconButton, InputLabel, MenuItem, Select, Skeleton, Stack,
+    IconButton, InputAdornment, InputLabel, MenuItem, Select, Skeleton, Stack,
     TextField, Tooltip, Typography,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
@@ -12,7 +13,10 @@ import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import StickyNote2OutlinedIcon from "@mui/icons-material/StickyNote2Outlined";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -22,7 +26,7 @@ dayjs.extend(isoWeek);
 import { useEffect, useMemo, useState } from "react";
 import { v4 as uuid } from "uuid";
 import 'dayjs/locale/en-gb';
-import { getWeeklyWod } from "../libs/SupabaseEdge";
+import { getDailyWodDB_ALL, setUpdatedWOD } from "../libs/SupabaseEdge";
 import ReactMarkdown from 'react-markdown';
 
 // ─── Locale ───────────────────────────────────────────────────────────────────
@@ -32,7 +36,7 @@ const CALENDAR_LOCALE = WEEK_START_DAY === 'mon' ? 'en-gb' : 'en';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type SectionType = "strength" | "metcon" | "gymnastics" | "cardio" | "rest" | "conditioning" | "accessory";
+type SectionType = "strength" | "metcon" | "gymnastics" | "cardio" | "rest" | "conditioning" | "accessory" | "skill";
 
 interface WorkoutSection {
     id: string;
@@ -56,22 +60,13 @@ interface ApiSection {
 }
 
 interface ApiWodItem {
-    id: string; // DDMMYYYY
-    data: {
-        workout_id: string;
-        workout_name: string;
-        sections: ApiSection[];
+    workout_date: string; // "YYYY-MM-DD"
+    workout: {
+        wod_id: string;
+        wod_name: string;
+        content: ApiSection[];
+        tags: string[];
     };
-}
-
-// ─── Parse seed (DDMMYYYY) → "YYYY-MM-DD" ────────────────────────────────────
-
-function seedToDateKey(seed: number): string {
-    const s = String(seed).padStart(8, "0");
-    const dd = s.slice(0, 2);
-    const mm = s.slice(2, 4);
-    const yyyy = s.slice(4, 8);
-    return `${yyyy}-${mm}-${dd}`;
 }
 
 // ─── Map API response → Record<dateKey, DayWorkout> ──────────────────────────
@@ -79,13 +74,13 @@ function seedToDateKey(seed: number): string {
 function parseWodData(items: ApiWodItem[]): Record<string, DayWorkout> {
     const result: Record<string, DayWorkout> = {};
     for (const item of items) {
-        const dateKey = seedToDateKey(Number(item.id.split("_")[0]));
-        const obj = item.data;
+        const dateKey = item.workout_date; // already "YYYY-MM-DD"
+        const w = item.workout;
         result[dateKey] = {
-            id: obj?.workout_id ?? uuid(),
-            name: obj?.workout_name ?? dateKey,
+            id: w?.wod_id ?? uuid(),
+            name: w?.wod_name?.trim() || dateKey,
             sections:
-                (obj?.sections?.length ?? 0) === 0
+                (w?.content?.length ?? 0) === 0
                     ? [
                         {
                             id: uuid(),
@@ -94,13 +89,12 @@ function parseWodData(items: ApiWodItem[]): Record<string, DayWorkout> {
                             notes: "",
                         },
                     ]
-                    : obj.sections.map((sec) => ({
+                    : w.content.map((sec) => ({
                         id: uuid(),
                         type: sec.section_name as SectionType,
                         content: sec.section_content,
                         notes: sec.section_notes?.join("\n") ?? "",
                     })),
-
         };
     }
     return result;
@@ -112,6 +106,7 @@ const SECTION_TYPES: { value: SectionType; label: string }[] = [
     { value: "strength", label: "Strength" },
     { value: "metcon", label: "Metcon" },
     { value: "gymnastics", label: "Gymnastics" },
+    { value: "skill", label: "Skill" },
     { value: "cardio", label: "Cardio" },
     { value: "conditioning", label: "Conditioning" },
     { value: "accessory", label: "Accessory" },
@@ -122,6 +117,7 @@ const SECTION_COLORS: Record<string, { bg: string; color: string }> = {
     strength: { bg: "#EAF3DE", color: "#3B6D11" },
     metcon: { bg: "#FAECE7", color: "#993C1D" },
     gymnastics: { bg: "#EEEDFE", color: "#534AB7" },
+    skill: { bg: "#FEF3C7", color: "#92400E" },
     cardio: { bg: "#E6F1FB", color: "#185FA5" },
     conditioning: { bg: "#E6F1FB", color: "#185FA5" },
     accessory: { bg: "#FDF3E3", color: "#7A4F1D" },
@@ -137,7 +133,7 @@ const EMPTY_SECTION = (): WorkoutSection => ({
     notes: "",
 });
 
-// ─── WorkoutDisplayer placeholder ────────────────────────────────────────────
+// ─── WorkoutDisplayer ─────────────────────────────────────────────────────────
 
 function WorkoutDisplayer({ content }: { content: string }) {
     if (!content.trim()) {
@@ -148,7 +144,6 @@ function WorkoutDisplayer({ content }: { content: string }) {
             </Typography>
         );
     }
-    // ↓ Replace with your real <WorkoutDisplayer /> component
     return (
         <Typography variant="caption" color="text.secondary"
             sx={{ whiteSpace: "pre-wrap", fontFamily: "monospace", display: "block" }}>
@@ -168,7 +163,7 @@ function TypeChip({ type }: { type: string }) {
     );
 }
 
-// ─── Section card (shared between desktop + mobile) ───────────────────────────
+// ─── Section card ─────────────────────────────────────────────────────────────
 
 function SectionCard({ sec }: { sec: WorkoutSection }) {
     return (
@@ -204,7 +199,7 @@ function SectionCard({ sec }: { sec: WorkoutSection }) {
     );
 }
 
-// ─── Day column skeleton (loading state) ─────────────────────────────────────
+// ─── Day column skeleton ──────────────────────────────────────────────────────
 
 function DayColumnSkeleton() {
     return (
@@ -226,6 +221,167 @@ function DayColumnSkeleton() {
     );
 }
 
+
+// ─── Helper: map DayWorkout → API body ───────────────────────────────────────
+
+function toApiBody(workout: DayWorkout) {
+    return {
+        wod_id: workout.id,
+        wod_name: workout.name,
+        content: workout.sections.map((sec) => ({
+            section_name: sec.type,
+            section_content: sec.content,
+            section_notes: sec.notes ? sec.notes.split("\n").filter(Boolean) : [],
+        })),
+        tags: [] as string[],
+    };
+}
+
+// ─── Secret key confirmation dialog ──────────────────────────────────────────
+
+type SaveStatus = "idle" | "loading" | "success" | "error";
+
+interface SecretKeyDialogProps {
+    open: boolean;
+    workout: DayWorkout | null;
+    onClose: () => void;
+    onSuccess: (workout: DayWorkout) => void;
+}
+
+function SecretKeyDialog({ open, workout, onClose, onSuccess }: SecretKeyDialogProps) {
+    const [secretKey, setSecretKey] = useState("");
+    const [showKey, setShowKey] = useState(false);
+    const [status, setStatus] = useState<SaveStatus>("idle");
+    const [errorMsg, setErrorMsg] = useState("");
+
+    useEffect(() => {
+        if (open) {
+            setSecretKey("");
+            setShowKey(false);
+            setStatus("idle");
+            setErrorMsg("");
+        }
+    }, [open]);
+
+    const handleConfirm = async () => {
+        if (!secretKey.trim() || !workout) return;
+        setStatus("loading");
+        setErrorMsg("");
+        try {
+            const body = toApiBody(workout);
+            const result = await setUpdatedWOD(workout.id, secretKey.trim(), body);
+            // treat 200 / truthy as success
+            // if (result && (result.status === 200 || result.success || result.data)) {
+            //     setStatus("success");
+            //     setTimeout(() => {
+            //         onSuccess(workout);
+            //         onClose();
+            //     }, 1200);
+            // } else {
+            //     setStatus("error");
+            //     setErrorMsg("Failed to update workout. Check your secret key and try again.");
+            // }
+            if (result && (result.status === "UPDATED" || result.status === "NO_CHANGE")) {
+                setStatus("success");
+                setTimeout(() => {
+                    onSuccess(workout);
+                    onClose();
+                }, 1200);
+                
+            } else {
+                setStatus("error");
+                setErrorMsg("Failed to update workout. Check your secret key and try again.");
+            }
+        } catch (err: any) {
+            setStatus("error");
+            setErrorMsg(err?.message ?? "Failed to update workout. Please try again.");
+        }
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === "Enter" && secretKey.trim() && status !== "loading") handleConfirm();
+    };
+
+    return (
+        <Dialog open={open} onClose={status === "loading" ? undefined : onClose} maxWidth="xs" fullWidth>
+            <DialogTitle sx={{ pb: 1 }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <LockOutlinedIcon fontSize="small" color="action" />
+                    <Typography variant="h6" sx={{ fontWeight: 700, fontSize: "1rem" }}>
+                        Confirm save
+                    </Typography>
+                </Box>
+                <Typography variant="caption" color="text.secondary" sx={{ mt: 0.25, display: "block" }}>
+                    Enter your secret key to save changes to <strong>{workout?.name || "this workout"}</strong>.
+                </Typography>
+            </DialogTitle>
+
+            <DialogContent sx={{ pt: "8px !important" }}>
+                <Stack spacing={2}>
+                    {status === "success" && (
+                        <Alert severity="success" icon={<CheckCircleOutlineIcon fontSize="inherit" />}>
+                            Workout updated successfully!
+                        </Alert>
+                    )}
+                    {status === "error" && (
+                        <Alert severity="error">{errorMsg}</Alert>
+                    )}
+                    <TextField
+                        autoFocus
+                        label="Secret key"
+                        type={showKey ? "text" : "password"}
+                        size="small"
+                        fullWidth
+                        value={secretKey}
+                        onChange={(e) => setSecretKey(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                        disabled={status === "loading" || status === "success"}
+                        variant="outlined"
+                        slotProps={{
+                            input: {
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <LockOutlinedIcon sx={{ fontSize: 16, color: "text.disabled" }} />
+                                    </InputAdornment>
+                                ),
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <IconButton
+                                            size="small"
+                                            onClick={() => setShowKey((v) => !v)}
+                                            edge="end"
+                                        >
+                                            {showKey
+                                                ? <VisibilityOffIcon sx={{ fontSize: 16 }} />
+                                                : <VisibilityIcon sx={{ fontSize: 16 }} />}
+                                        </IconButton>
+                                    </InputAdornment>
+                                ),
+                            },
+                        }}
+                    />
+                </Stack>
+            </DialogContent>
+
+            <DialogActions sx={{ px: 3, pb: 2.5, pt: 1 }}>
+                <Button onClick={onClose} disabled={status === "loading" || status === "success"} size="small">
+                    Cancel
+                </Button>
+                <Button
+                    variant="contained"
+                    size="small"
+                    disableElevation
+                    onClick={handleConfirm}
+                    disabled={!secretKey.trim() || status === "loading" || status === "success"}
+                    startIcon={status === "loading" ? <CircularProgress size={14} color="inherit" /> : undefined}
+                >
+                    {status === "loading" ? "Saving…" : "Confirm & Save"}
+                </Button>
+            </DialogActions>
+        </Dialog>
+    );
+}
+
 // ─── Edit / Add dialog ────────────────────────────────────────────────────────
 
 interface EditWorkoutDialogProps {
@@ -240,11 +396,15 @@ interface EditWorkoutDialogProps {
 function EditWorkoutDialog({ open, date, initial, onClose, onSave, onDelete }: EditWorkoutDialogProps) {
     const [name, setName] = useState("");
     const [sections, setSections] = useState<WorkoutSection[]>([EMPTY_SECTION()]);
+    const [pendingWorkout, setPendingWorkout] = useState<DayWorkout | null>(null);
+    const [secretDialogOpen, setSecretDialogOpen] = useState(false);
 
     useEffect(() => {
         if (open) {
             setName(initial?.name ?? "");
             setSections(initial?.sections?.length ? initial.sections : [EMPTY_SECTION()]);
+            setPendingWorkout(null);
+            setSecretDialogOpen(false);
         }
     }, [open, initial]);
 
@@ -253,12 +413,21 @@ function EditWorkoutDialog({ open, date, initial, onClose, onSave, onDelete }: E
     const updateSection = (id: string, patch: Partial<WorkoutSection>) =>
         setSections((s) => s.map((sec) => (sec.id === id ? { ...sec, ...patch } : sec)));
 
-    const handleSave = () => {
-        onSave({
+    // Step 1: clicking "Save workout" builds the object and opens the secret key dialog
+    const handleSaveClick = () => {
+        const workout: DayWorkout = {
             id: initial?.id ?? uuid(),
             name: name.trim() || date.format("ddd, MMM D"),
             sections,
-        });
+        };
+        setPendingWorkout(workout);
+        setSecretDialogOpen(true);
+    };
+
+    // Step 2: secret key confirmed + API returned 200 → commit to parent state
+    const handleSecretConfirmed = (workout: DayWorkout) => {
+        setSecretDialogOpen(false);
+        onSave(workout);
     };
 
     const isEdit = !!initial;
@@ -371,9 +540,17 @@ function EditWorkoutDialog({ open, date, initial, onClose, onSave, onDelete }: E
                 ) : <Box />}
                 <Box sx={{ display: "flex", gap: 1 }}>
                     <Button onClick={onClose}>Cancel</Button>
-                    <Button variant="contained" onClick={handleSave} disableElevation>Save workout</Button>
+                    <Button variant="contained" onClick={handleSaveClick} disableElevation>Save workout</Button>
                 </Box>
             </DialogActions>
+
+            {/* ── Secret key confirmation (nested, so it overlays the edit dialog) ── */}
+            <SecretKeyDialog
+                open={secretDialogOpen}
+                workout={pendingWorkout}
+                onClose={() => setSecretDialogOpen(false)}
+                onSuccess={handleSecretConfirmed}
+            />
         </Dialog>
     );
 }
@@ -609,7 +786,31 @@ function AddWodPage() {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [activeDate, setActiveDate] = useState<Dayjs>(dayjs());
     const [workouts, setWorkouts] = useState<Record<string, DayWorkout>>({});
-    const [loading, setLoading] = useState(false);
+    const [availableDates, setAvailableDates] = useState<Set<string>>(new Set());
+    const [loading, setLoading] = useState(true);
+
+    // ── Fetch ALL wod data once on mount ─────────────────────────────────────
+    useEffect(() => {
+        let cancelled = false;
+        async function load() {
+            setLoading(true);
+            try {
+                const result: ApiWodItem[] | null = await getDailyWodDB_ALL() ?? null;
+                if (cancelled) return;
+                if (result && result.length > 0) {
+                    const parsed = parseWodData(result);
+                    setWorkouts(parsed);
+                    setAvailableDates(new Set(Object.keys(parsed)));
+                }
+            } catch (err) {
+                console.error("Failed to load WODs", err);
+            } finally {
+                if (!cancelled) setLoading(false);
+            }
+        }
+        load();
+        return () => { cancelled = true; };
+    }, []); // runs once on mount
 
     // ── Derived — always reflects the displayed week ──────────────────────────
     const weekStart = selectedDate.startOf("isoWeek");
@@ -624,44 +825,30 @@ function AddWodPage() {
 
     const weekKey = (date: Dayjs) => date.format("YYYY-MM-DD");
 
-    // ── Fetch when week changes ───────────────────────────────────────────────
-    useEffect(() => {
-        let cancelled = false;
-        async function load() {
-            setLoading(true);
-            try {
-                const result: ApiWodItem[] | null = await getWeeklyWod(weekNumberAPI, currentYearForAPI) ?? null;
-                if (cancelled) return;
-                if (result && result.length > 0) {
-                    setWorkouts((prev) => ({
-                        ...prev,
-                        ...parseWodData(result),
-                    }));
-                }
-            } catch (err) {
-                console.error("Failed to load WODs", err);
-            } finally {
-                if (!cancelled) setLoading(false);
-            }
-        }
-        load();
-        return () => { cancelled = true; };
-    }, [weekNumberAPI, currentYearForAPI]);
-
     const openDialog = (date: Dayjs) => {
-        setActiveDate(date);        // ← restored: was incorrectly commented out
+        setActiveDate(date);
         setDialogOpen(true);
     };
 
     const handleSave = (workout: DayWorkout) => {
-        setWorkouts((prev) => ({ ...prev, [weekKey(activeDate)]: workout }));
+        const key = weekKey(activeDate);
+        setWorkouts((prev) => ({ ...prev, [key]: workout }));
+        // also mark this date as available after saving
+        setAvailableDates((prev) => new Set([...prev, key]));
         setDialogOpen(false);
     };
 
     const handleDelete = () => {
+        const key = weekKey(activeDate);
         setWorkouts((prev) => {
             const next = { ...prev };
-            delete next[weekKey(activeDate)];
+            delete next[key];
+            return next;
+        });
+        // remove from available dates
+        setAvailableDates((prev) => {
+            const next = new Set(prev);
+            next.delete(key);
             return next;
         });
         setDialogOpen(false);
@@ -748,7 +935,6 @@ function AddWodPage() {
                         sx={{ fontSize: "0.75rem", py: 0.5 }}>
                         Calendar
                     </Button>
-                    {/* Inline loading indicator */}
                     {loading && <CircularProgress size={18} thickness={4} />}
                 </Box>
             </Box>
@@ -769,6 +955,35 @@ function AddWodPage() {
                                 if (!val) return;
                                 setSelectedDate(val);
                                 setCalendarOpen(false);
+                            }}
+                            // ── Only dates with WOD data are selectable ──────
+                            shouldDisableDate={(day: Dayjs) =>
+                                !availableDates.has(day.format("YYYY-MM-DD"))
+                            }
+                            // ── Style available dates with a green dot ───────
+                            slotProps={{
+                                day: (ownerState) => {
+                                    const key = ownerState.day.format("YYYY-MM-DD");
+                                    const hasWod = availableDates.has(key);
+                                    return {
+                                        sx: hasWod
+                                            ? {
+                                                position: "relative",
+                                                "&::after": {
+                                                    content: '""',
+                                                    position: "absolute",
+                                                    bottom: 2,
+                                                    left: "50%",
+                                                    transform: "translateX(-50%)",
+                                                    width: 4,
+                                                    height: 4,
+                                                    borderRadius: "50%",
+                                                    bgcolor: "primary.main",
+                                                },
+                                            }
+                                            : {},
+                                    };
+                                },
                             }}
                         />
                     </LocalizationProvider>

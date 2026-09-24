@@ -11,8 +11,8 @@ interface WorkoutSection {
 }
 
 interface WorkoutObject {
-    workout_id: string;
-    workout_name: string;
+    wod_id: string;
+    wod_name: string;
     sections: WorkoutSection[];
     metadata?: Record<string, any>;
 }
@@ -87,7 +87,7 @@ function WorkoutSection({ workout }: Props) {
                 fontWeight: 'bold', mb: 2, pl: 1,
                 fontSize: { xs: '1.1rem', md: '2rem' }
             }}>
-                {workout?.workout_name}
+                {workout?.wod_name}
             </Typography>
 
 
@@ -262,3 +262,4 @@ function WorkoutSection({ workout }: Props) {
 }
 
 export default WorkoutSection
+export type { WorkoutObject };
